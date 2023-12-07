@@ -6,12 +6,14 @@ import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { environments } from 'environments';
+import { config } from '../config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: environments[process.env.NODE_ENV] || '.env',
-      isGlobal: true
+      isGlobal: true,
+      load: [config]
     }),
     ProductsModule,
     UsersModule,
