@@ -1,38 +1,34 @@
 import { Module, Global } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigType } from '@nestjs/config';
-import { Client } from 'pg';
 import { config } from 'src/config';
 
 const varToUseGlobally = `I'm the global variable`;
 
 @Global()
 @Module({
+    imports: [TypeOrmModule.forRootAsync({
+        inject: [config.KEY],
+        useFactory: (configService: ConfigType<typeof config>) => {
+            const { host, port, user, password, name } = configService.postgres
+            return {
+                type: 'postgres',
+                host,
+                port,
+                username: user,
+                password,
+                database: name,
+                synchronize: true,
+                autoLoadEntities: true
+            }
+        }
+    })],
     providers: [
         {
             provide: 'varToUseGlobally',
             useValue: varToUseGlobally
-        },
-        {
-            provide: 'PG',
-            useFactory: (configService: ConfigType<typeof config>) => {
-                const { user, host, name, password, port } = configService.postgres;
-
-                const client = new Client({
-                    user,
-                    host,
-                    database: name,
-                    password,
-                    port
-                });
-
-                client.connect()
-
-                return client;
-            },
-            inject: [config.KEY]
-        },
+        }
     ],
-    exports: ['varToUseGlobally', 'PG']
+    exports: ['varToUseGlobally', TypeOrmModule]
 })
 export class DatabaseModule { }
-
