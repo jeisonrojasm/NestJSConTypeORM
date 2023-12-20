@@ -18,7 +18,7 @@ const varToUseGlobally = `I'm the global variable`;
                 username: user,
                 password,
                 database: name,
-                synchronize: true,
+                synchronize: false,
                 autoLoadEntities: true
             }
         }
