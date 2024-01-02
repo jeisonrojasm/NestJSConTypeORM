@@ -33,7 +33,7 @@ export class Customer {
         type: 'timestamptz',
         default: () => 'CURRENT_TIMESTAMP'
     })
-    updateAt: Date;
+    updatedAt: Date;
 
     @OneToOne(() => User, user => user.customer, { nullable: true })
     user: User;

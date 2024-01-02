@@ -34,7 +34,7 @@ export class User {
         type: 'timestamptz',
         default: () => 'CURRENT_TIMESTAMP'
     })
-    updateAt: Date;
+    updatedAt: Date;
 
     @OneToOne(() => Customer, customer => customer.user, { nullable: true })
     @JoinColumn()
