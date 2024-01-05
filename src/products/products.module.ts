@@ -9,9 +9,10 @@ import { Brand } from './entities/brand.entity';
 import { CategoriesController } from './controllers/categories/categories.controller';
 import { BrandsService } from './services/brands/brands.service';
 import { CategoriesService } from './services/categories/categories.service';
+import { Category } from './entities/category.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Brand])],
+  imports: [TypeOrmModule.forFeature([Product, Brand, Category])],
   exports: [ProductsService],
   controllers: [ProductsController, BrandsController, CategoriesController],
   providers: [ProductsService, BrandsService, CategoriesService]
