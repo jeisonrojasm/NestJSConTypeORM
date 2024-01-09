@@ -20,12 +20,6 @@ export class UsersController {
         return this.usersService.findOne(id);
     }
 
-    @ApiOperation({ summary: 'Return an orders list of an user searched by id' })
-    @Get(':id/orders')
-    getOrders(@Param('id', ParseIntPipe) id: number) {
-        return this.usersService.getOrdersByUser(id);
-    }
-
     @ApiOperation({ summary: 'Create a new user' })
     @Post()
     create(@Body() payload: CreateUserDto) {

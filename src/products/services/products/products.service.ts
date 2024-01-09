@@ -2,26 +2,28 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto, UpdateProductDto } from 'src/products/dtos/products.dto';
 import { Product } from 'src/products/entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Brand } from 'src/products/entities/brand.entity';
 import { BrandsService } from '../brands/brands.service';
+import { Category } from 'src/products/entities/category.entity';
 
 @Injectable()
 export class ProductsService {
 
     constructor(
         @InjectRepository(Product) private readonly productRepository: Repository<Product>,
-        @InjectRepository(Brand) private readonly brandsService: Repository<Brand>
+        @InjectRepository(Brand) private readonly brandsRepository: Repository<Brand>,
+        @InjectRepository(Category) private readonly categoriesRepository: Repository<Category>
     ) { }
 
     findAll() {
         return this.productRepository.find({
-            relations: ['brand']
+            relations: ['brand', 'categories']
         });
     }
 
     async findOne(id: number) {
-        const product = await this.productRepository.findOne({ where: { id }, relations: ['brand'] })
+        const product = await this.productRepository.findOne({ where: { id }, relations: ['brand', 'categories'] })
         if (!product) {
             throw new NotFoundException(`Product #${id} not found`);
         }
@@ -31,8 +33,12 @@ export class ProductsService {
     async create(payload: CreateProductDto) {
         const newProduct = this.productRepository.create(payload);
         if (payload.brandId) {
-            const brand = await this.brandsService.findOne({ where: { id: payload.brandId } })
+            const brand = await this.brandsRepository.findOne({ where: { id: payload.brandId } })
             newProduct.brand = brand;
+        }
+        if (payload.categoriesIds) {
+            const categories = await this.categoriesRepository.findBy({ id: In(payload.categoriesIds) })
+            newProduct.categories = categories;
         }
         return this.productRepository.save(newProduct);
     }
@@ -40,11 +46,31 @@ export class ProductsService {
     async update(id: number, payload: UpdateProductDto) {
         const product = await this.productRepository.findOneBy({ id: id })
         if (payload.brandId) {
-            const brand = await this.brandsService.findOne({ where: { id: payload.brandId } });
+            const brand = await this.brandsRepository.findOne({ where: { id: payload.brandId } });
             product.brand = brand;
+        }
+        if (payload.categoriesIds) {
+            const categories = await this.categoriesRepository.findBy({ id: In(payload.categoriesIds) })
+            product.categories = categories;
         }
         this.productRepository.merge(product, payload)
         return this.productRepository.save(product)
+    }
+
+    async removeCategoryInProduct(productId: number, categoryId: number) {
+        const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['categories'] });
+        product.categories = product.categories.filter(category => category.id !== categoryId);
+        return this.productRepository.save(product);
+    }
+
+    async addCategoryInProduct(productId: number, categoryId: number) {
+        const product = await this.productRepository.findOne({ where: { id: productId }, relations: ['categories'] });
+        const category = await this.categoriesRepository.findOne({ where: { id: categoryId } });
+        if (!category) {
+            throw new NotFoundException(`Category #${categoryId} not found.`);
+        }
+        product.categories.push(category);
+        return this.productRepository.save(product);
     }
 
     remove(id: number) {

@@ -42,4 +42,22 @@ export class ProductsController {
     delete(@Param('id') id: number) {
         return this.productsService.remove(id);
     }
+
+    @ApiOperation({ summary: 'Removes a category from a product' })
+    @Delete(':productId/category/:categoryId')
+    deleteCategoryInProduct(
+        @Param('productId', ParseIntPipe) productId: number,
+        @Param('categoryId', ParseIntPipe) categoryId: number,
+    ) {
+        return this.productsService.removeCategoryInProduct(productId, categoryId);
+    }
+
+    @ApiOperation({ summary: 'Add a category in a product' })
+    @Put(':productId/category/:categoryId')
+    addCategoryInAProduct(
+        @Param('productId', ParseIntPipe) productId: number,
+        @Param('categoryId', ParseIntPipe) categoryId: number,
+    ) {
+        return this.productsService.addCategoryInProduct(productId, categoryId);
+    }
 }

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto, UpdateUserDto } from 'src/users/dtos/users.dto';
-import { Order } from 'src/users/entities/order.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ProductsService } from 'src/products/services/products/products.service';
 import { CustomersService } from '../customers/customers.service';
@@ -29,15 +28,6 @@ export class UsersService {
             throw new NotFoundException(`User #${id} not found`);
         }
         return user;
-    }
-
-    async getOrdersByUser(id: number): Promise<Order> {
-        const user = await this.findOne(id);
-        return {
-            date: new Date(),
-            user,
-            products: await this.productsService.findAll()
-        }
     }
 
     async create(data: CreateUserDto) {
