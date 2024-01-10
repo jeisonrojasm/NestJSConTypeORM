@@ -6,8 +6,11 @@ import {
     UpdateDateColumn,
     ManyToOne,
     ManyToMany,
-    JoinTable
+    JoinTable,
+    JoinColumn
 } from "typeorm";
+
+import { Exclude } from "class-transformer";
 
 import { Brand } from "./brand.entity";
 import { Category } from "./category.entity";
@@ -32,11 +35,13 @@ export class Product {
     @Column({ type: 'varchar' })
     image: string;
 
+    @Exclude()
     @CreateDateColumn({
         type: 'timestamptz',
         default: () => 'CURRENT_TIMESTAMP'
     })
     createdAt: Date;
+
 
     @UpdateDateColumn({
         type: 'timestamptz',
@@ -45,9 +50,14 @@ export class Product {
     updatedAt: Date;
 
     @ManyToOne(() => Brand, (brand) => brand.products)
+    @JoinColumn({ name: 'brand_id' })
     brand: Brand;
 
     @ManyToMany(() => Category, (category) => category.products)
-    @JoinTable()
+    @JoinTable({
+        name: 'products_categories',
+        joinColumn: { name: 'product_id' },
+        inverseJoinColumn: { name: 'category_id' }
+    })
     categories: Category[];
 }

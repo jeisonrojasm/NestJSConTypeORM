@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductDto, UpdateProductDto } from 'src/products/dtos/products.dto';
+import { CreateProductDto, FilterProductsDto, UpdateProductDto } from 'src/products/dtos/products.dto';
 import { Product } from 'src/products/entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Brand } from 'src/products/entities/brand.entity';
 import { BrandsService } from '../brands/brands.service';
 import { Category } from 'src/products/entities/category.entity';
@@ -16,9 +16,27 @@ export class ProductsService {
         @InjectRepository(Category) private readonly categoriesRepository: Repository<Category>
     ) { }
 
-    findAll() {
+    findAll(params?: FilterProductsDto) {
+        if (params.take && params.skip) {
+            return this.productRepository.find({
+                relations: ['brand', 'categories'],
+                order: { id: 'ASC' },
+                take: params.take,
+                skip: params.skip
+            });
+        }
+
+        if (params.minPrice >= 0 && params.maxPrice > 0) {
+            return this.productRepository.find({
+                relations: ['brand', 'categories'],
+                order: { id: 'ASC' },
+                where: { price: Between(params.minPrice, params.maxPrice) }
+            });
+        }
+
         return this.productRepository.find({
-            relations: ['brand', 'categories']
+            relations: ['brand', 'categories'],
+            order: { id: 'ASC' }
         });
     }
 

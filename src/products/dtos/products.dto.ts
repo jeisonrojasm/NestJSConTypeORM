@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { IsString, IsNotEmpty, IsUrl, IsNumber, IsPositive, IsArray } from "class-validator";
+import { IsString, IsNotEmpty, IsUrl, IsNumber, IsPositive, IsArray, IsOptional, Min, ValidateIf } from "class-validator";
 import { Category } from "../entities/category.entity";
 
 export class CreateProductDto {
@@ -31,16 +31,34 @@ export class CreateProductDto {
     @IsUrl()
     readonly image: string;
 
-    @ApiProperty({ description: `Product's brand`})
+    @ApiProperty({ description: `Product's brand` })
     @IsNotEmpty()
     @IsPositive()
     readonly brandId: number;
 
-    @ApiProperty({ description: `Product's categories`})
+    @ApiProperty({ description: `Product's categories` })
     @IsNotEmpty()
     @IsArray()
     readonly categoriesIds: number[];
 }
 
 export class UpdateProductDto extends PartialType(CreateProductDto) { }
+
+export class FilterProductsDto {
+    @IsOptional()
+    @IsPositive()
+    take: number;
+
+    @IsOptional()
+    @Min(0)
+    skip: number;
+
+    @IsOptional()
+    @Min(0)
+    minPrice: number;
+
+    @ValidateIf(item => item.minPrice)
+    @IsPositive()
+    maxPrice: number;
+}
 
